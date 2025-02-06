@@ -132,7 +132,7 @@ fun MainScreen() {
                 }
             }
             MessageList(messages = messages, onItemClick = { message ->
-                Toast.makeText(context, "Clicked on ${message.body}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, message.body, Toast.LENGTH_SHORT).show()
             })
         }
     }
