@@ -1,10 +1,17 @@
 package com.nascenia.composeexcercise
 
+import android.app.Activity
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -32,9 +39,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.nascenia.composeexcercise.ui.theme.ComposeExcerciseTheme
 
 class MainActivity : ComponentActivity() {
@@ -43,14 +51,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComposeExcerciseTheme {
-                MainScreen()
+                MainScreen { message -> showNotification(message) }
             }
         }
+    }
+
+    private fun showNotification(message: Message) {
+        val notification = NotificationCompat.Builder(applicationContext, "channel_id")
+            .setSmallIcon(R.drawable.chat_unread)
+            .setContentTitle(message.author)
+            .setContentText(message.body)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(1, notification)
     }
 }
 
 data class Message(val author: String, val body: String)
-
 
 @Composable
 fun MessageCard(msg: Message, onClick: () -> Unit) {
@@ -70,26 +91,41 @@ fun MessageCard(msg: Message, onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column {
-            Text(
-                text = msg.author,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = msg.body,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal
-            )
+            Text(text = msg.author, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = msg.body, fontSize = 12.sp, fontWeight = FontWeight.Normal)
         }
     }
 }
 
 @Composable
-fun MessageList(messages: List<Message>, onItemClick: (Message) -> Unit) {
+fun MessageList(messages: List<Message>, showNotifications: (Message) -> Unit) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Permission granted, proceed with notification
+        }
+    }
+
     LazyColumn {
         items(messages) { message ->
             MessageCard(msg = message, onClick = {
-                onItemClick(message)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(
+                            context, android.Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        showNotifications(message)
+                    } else {
+                        activity?.let {
+                            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                } else {
+                    showNotifications(message)
+                }
             })
         }
     }
@@ -97,7 +133,7 @@ fun MessageList(messages: List<Message>, onItemClick: (Message) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(showNotifications: (Message) -> Unit) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
@@ -111,7 +147,7 @@ fun MainScreen() {
                 },
                 actions = {
                     IconButton(onClick = {
-                        Toast.makeText(context, "Not Implement it !", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Not Implemented!", Toast.LENGTH_SHORT).show()
                     }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.baseline_menu_24),
@@ -131,18 +167,7 @@ fun MainScreen() {
                     else -> Message("Alice Johnson", "Flutter Engineer")
                 }
             }
-            MessageList(messages = messages, onItemClick = { message ->
-                Toast.makeText(context, message.body, Toast.LENGTH_SHORT).show()
-            })
+            MessageList(messages = messages, showNotifications = showNotifications)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MessageListPreview() {
-    ComposeExcerciseTheme {
-        val sampleMessages = List(4) { Message("John Doe", "Android Developer") }
-        MessageList(messages = sampleMessages) {}
     }
 }
