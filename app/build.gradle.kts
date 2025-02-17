@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -56,4 +57,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(platform(libs.firebase.bom))
+
+    implementation (libs.firebase.messaging)
+
+    // Retrofit
+    implementation (libs.retrofit)
+
+    // Retrofit Converter for JSON (Gson)
+    implementation (libs.converter.gson)
+
+    // OkHttp for networking (optional but recommended)
+    implementation (libs.okhttp)
+
+    // OkHttp logging interceptor (for logging HTTP requests/responses)
+    implementation (libs.logging.interceptor)
+
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "780613904687",
+    "project_id": "composeexcercise",
+    "storage_bucket": "composeexcercise.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780613904687:android:38dda6ce7e83bf016f99da",
+        "android_client_info": {
+          "package_name": "com.nascenia.composeexcercise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrQVWvKgk-6VzG8XwgpVcSfts2x9SO26M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

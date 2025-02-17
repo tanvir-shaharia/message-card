@@ -3,6 +3,7 @@ package com.nascenia.composeexcercise
 import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -101,11 +102,12 @@ fun MessageCard(msg: Message, onClick: () -> Unit) {
 fun MessageList(messages: List<Message>, showNotifications: (Message) -> Unit) {
     val context = LocalContext.current
     val activity = context as? Activity
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            // Permission granted, proceed with notification
+        if (!isGranted) {
+            Toast.makeText(context, "Notification permission denied!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -119,9 +121,7 @@ fun MessageList(messages: List<Message>, showNotifications: (Message) -> Unit) {
                     ) {
                         showNotifications(message)
                     } else {
-                        activity?.let {
-                            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                        }
+                        launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                     }
                 } else {
                     showNotifications(message)
@@ -130,6 +130,7 @@ fun MessageList(messages: List<Message>, showNotifications: (Message) -> Unit) {
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,7 +148,7 @@ fun MainScreen(showNotifications: (Message) -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = {
-                        Toast.makeText(context, "Not Implemented!", Toast.LENGTH_SHORT).show()
+                        context.startActivity(Intent(context,MainActivity2::class.java))
                     }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.baseline_menu_24),
