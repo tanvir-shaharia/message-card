@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class NotificationsViewModel : ViewModel() {
 
-   private var state by mutableStateOf(ChatState())
+   var state by mutableStateOf(ChatState())
 
     fun onRemoteTokenChange(newToken: String){
        state = state.copy(
@@ -17,7 +17,7 @@ class NotificationsViewModel : ViewModel() {
        )
     }
 
-    fun onSubmitRemoteToken(newToken: String){
+    fun onSubmitRemoteToken(){
        state = state.copy(
            isEnteringToken = false
        )
@@ -29,20 +29,34 @@ class NotificationsViewModel : ViewModel() {
         )
     }
 
-    fun sendMessage(sendMessageDto: SendMessageDto) {
+    fun sendMessage() {
         viewModelScope.launch {
+            val messageDto = SendMessageDto(
+                to = state.remoteToken ,
+                notification = NotificationBody(
+                    title = "New message!",
+                    body = state.messageText
+                )
+            )
             try {
-                val response = RetrofitClient.notificationsApi.sentMassage(sendMessageDto)
+                val response = RetrofitClient.notificationsApi.sentMassage(messageDto)
             } catch (e: Exception) {
                 // Handle failure, maybe show a toast or log the error
             }
         }
     }
 
-    fun broadcast(sendMessageDto: SendMessageDto) {
+    fun broadcast() {
         viewModelScope.launch {
+            val messageDto = SendMessageDto(
+                to = state.remoteToken ,
+                notification = NotificationBody(
+                    title = "New message!",
+                    body = state.messageText
+                )
+            )
             try {
-                val response = RetrofitClient.notificationsApi.broadcast(sendMessageDto)
+                val response = RetrofitClient.notificationsApi.broadcast(messageDto)
             } catch (e: Exception) {
                 // Handle failure, maybe show a toast or log the error
             }
