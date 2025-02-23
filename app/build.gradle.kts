@@ -74,4 +74,12 @@ dependencies {
     // OkHttp logging interceptor (for logging HTTP requests/responses)
     implementation (libs.logging.interceptor)
 
+    implementation(libs.accompanist.placeholder.material3)
+    implementation(libs.material3)
+
+    implementation(libs.shimmer)
+
+
+
+
 }
