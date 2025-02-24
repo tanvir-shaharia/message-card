@@ -2,7 +2,6 @@ package com.nascenia.composeexcercise
 
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,13 +46,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.nascenia.composeexcercise.ui.theme.ComposeExcerciseTheme
 import kotlinx.coroutines.delay
 
@@ -61,8 +63,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             ComposeExcerciseTheme {
-                MainScreen { message -> showNotification(message) }
+                NavHost(navController = navController, startDestination = "main_screen") {
+                    composable("main_screen") { MainScreen(navController, ::showNotification) }
+                    composable("mainActivity2") { MainActivity2Screen(navController) }
+                }
             }
         }
     }
@@ -187,8 +193,7 @@ fun rememberShimmerBrush(): Brush {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(showNotifications: (Message) -> Unit) {
-    val context = LocalContext.current
+fun MainScreen(navController: NavHostController, showNotifications: (Message) -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -201,7 +206,7 @@ fun MainScreen(showNotifications: (Message) -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = {
-                        context.startActivity(Intent(context,MainActivity2::class.java))
+                        navController.navigate("mainActivity2")
                     }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.baseline_menu_24),
@@ -232,3 +237,5 @@ fun MainScreen(showNotifications: (Message) -> Unit) {
         }
     }
 }
+
+
